@@ -39,6 +39,10 @@ const insertDataIntoDOM = (
     temperature.firstElementChild.textContent = Temperature.Metric.Value
 }
 
+const showLocalStorageCity = (cityName)=> {
+localStorage.setItem('city', cityName)
+
+}
 cityForm.addEventListener('submit', async event => {
     event.preventDefault()
 
@@ -60,6 +64,5 @@ cityForm.addEventListener('submit', async event => {
         IsDayTime, 
         Temperature
     )
-
     event.target.reset()
 })
