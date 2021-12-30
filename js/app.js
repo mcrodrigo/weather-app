@@ -1,54 +1,19 @@
 const cityForm = document.querySelector('[data-js="change-location"]')
 const weatherContainer = document.querySelector('[data-js="weather-container"]')
+const time = document.querySelector('[data-js="time"]')
+const timeIcon = document.querySelector('[data-js="time-icon"]')
+const city = document.querySelector('[data-js="city"]')
+const weather = document.querySelector('[data-js="weather"]')
+const temperature = document.querySelector('[data-js="temperature"]')
 
-const showWeatherContainer = element => {
-    if (element.classList.contains('d-none')) {
-        element.classList.remove('d-none')
+const showWeatherContainer = () => {
+    if (weatherContainer.classList.contains('d-none')) {
+        weatherContainer.classList.remove('d-none')
     }
 }
 
-const setTimeSrc = (element, timeOfDay) => {
-    const dayOrNight = (timeOfDay) ? 'day' : 'night'
-    element.setAttribute('src',`/src/${dayOrNight}.svg`)
-}
-
-const setTimeIcon = (element, icon) => {
-    element.innerHTML = `<img src="/src/icons/${icon}.svg">`
-}
-
-const insertDataIntoDOM = (
-    LocalizedName, 
-    WeatherText, 
-    WeatherIcon,
-    IsDayTime,
-    Temperature
-    ) => {
-
-        
-    const [time, timeIcon, weatherDetails] = weatherContainer.children
-    const [localized, weather, temperature] = weatherDetails.children
-        
-    showWeatherContainer(weatherContainer)
-    
-    setTimeSrc(time, IsDayTime)
-
-    setTimeIcon(timeIcon, WeatherIcon)
-    
-    localized.textContent = LocalizedName
-    weather.textContent = WeatherText
-    temperature.firstElementChild.textContent = Temperature.Metric.Value
-}
-
-const showLocalStorageCity = (cityName)=> {
-localStorage.setItem('city', cityName)
-
-}
-cityForm.addEventListener('submit', async event => {
-    event.preventDefault()
-
-    const cityName = event.target.city.value
-
-    const [{Key, LocalizedName}] = await getCityData(cityName)
+const showCityWeatherInfo = async cityName => {
+    const [{ Key, LocalizedName }] = await getCityData(cityName)
 
     const [{
         WeatherText,
@@ -56,13 +21,34 @@ cityForm.addEventListener('submit', async event => {
         IsDayTime,
         Temperature,
     }] = await getCityWeather(Key)
-    
-    insertDataIntoDOM(
-        LocalizedName,  
-        WeatherText, 
-        WeatherIcon, 
-        IsDayTime, 
-        Temperature
-    )
+
+    time.src = IsDayTime ? '/src/day.svg' : '/src/night.svg'
+    timeIcon.innerHTML = `<img src="/src/icons/${WeatherIcon}.svg">`
+    city.textContent = LocalizedName
+    weather.textContent = WeatherText
+    temperature.textContent = Temperature.Metric.Value
+
+    showWeatherContainer()
+}
+
+const showLocalStorageCity = () => {
+    const city = localStorage.getItem('lastCitySearched')
+
+    if (city) {
+        showCityWeatherInfo(city)
+    }
+}
+
+cityForm.addEventListener('submit', event => {
+    event.preventDefault()
+
+    const inputValue = event.target.city.value
+
+    showCityWeatherInfo(inputValue)
+
+    localStorage.setItem('lastCitySearched', inputValue)
+
     event.target.reset()
 })
+
+showLocalStorageCity()
